@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import plugin from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
+import graphql from "vite-plugin-graphql-loader";
 import fs from "fs";
 import path from "path";
 import child_process from "child_process";
@@ -50,7 +51,7 @@ const target = env.ASPNETCORE_HTTPS_PORT
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [plugin(), tailwindcss()],
+  plugins: [plugin(), tailwindcss(), graphql()],
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

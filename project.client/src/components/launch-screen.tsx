@@ -1,4 +1,4 @@
-import { cn } from "@/src/libs/cn";
+import { cn } from "@/libs/cn";
 
 type LaunchScreenProps = {
   isLoading: boolean;
