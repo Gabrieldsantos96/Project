@@ -1,0 +1,14 @@
+query Query1 {
+  userProfile {
+    id
+    email
+    userName
+    employeeSelectedRefId
+    employeeDtos {
+      id
+      tenantId
+      name
+      badgeDtos
+    }
+  }
+}
