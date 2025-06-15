@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 
 export const MUTATION_LOGOUT = gql`
   mutation Logout($input: RefreshTokenInput!) {
-    logout(input: $input) {
+    signout(input: $input) {
       data
       success
       message

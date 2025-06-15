@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const MUTATION_SIGN_IN = gql`
-  mutation SignIn($input: SignInInput!) {
-    signIn(input: $input) {
+  mutation Signin($input: SigninInput!) {
+    signin(input: $input) {
       data
       success
       message
