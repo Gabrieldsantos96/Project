@@ -1,76 +1,84 @@
-import { createContext, useCallback, useEffect, useState } from "react";
-import type { IUser } from "@/models";
+/* eslint-disable react-refresh/only-export-components */
 import { LaunchScreen } from "@/components/launch-screen";
-import { Key } from "@/constants/consts";
+import {
+  AUTH_STORAGE_KEY,
+  Key,
+  REFRESH_TOKEN_STORAGE_KEY,
+} from "@/constants/consts";
+import { reactQueryClient } from "@/libs/react-query-client";
+import type { IUser } from "@/models";
+import { sleep } from "@/utils/sleep";
 import { useQuery } from "@tanstack/react-query";
-import { reactQueryClient } from "../libs/react-query-client";
 
-interface ISessionContext {
-  signedIn: boolean;
-  user: IUser | null;
-  signin(): void;
-  signout(): void;
-}
+import { createContext, useEffect, useState } from "react";
+import type { PropsWithChildren } from "react";
 
-export const SessionContext = createContext({} as ISessionContext);
-
-const fetchUserProfile = async (): Promise<IUser> => {
-  const response = await fetch("/api/auth/me", {
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Sessão inválida");
-  }
-  return response.json();
+type ISession = {
+  isFetching: boolean;
+  hasSession: boolean;
+  applicationUser: IUser | null;
+  signIn: (token: string) => void;
+  signOut: () => void;
 };
 
-export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [signedIn, setSignedIn] = useState<boolean>(false);
+export const SessionContext = createContext<ISession>({
+  isFetching: false,
 
-  const { isError, isFetching, isSuccess, data } = useQuery({
+  hasSession: false,
+  applicationUser: null,
+  signIn: Function,
+  signOut: Function,
+});
+
+async function mockStoreAuthState(): Promise<IUser> {
+  await sleep(1000);
+  return {
+    id: "id",
+    email: "gabrielk6.mobile@gmail.com",
+    name: "Gabriel dos Santos",
+  } as IUser;
+}
+
+export function SessionProvider({ children }: PropsWithChildren) {
+  const [signedIn, setSignedIn] = useState(() => {
+    const jwt = localStorage.getItem(AUTH_STORAGE_KEY);
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
+    return !!jwt && !!refreshToken;
+  });
+  const hasSession = !!signedIn;
+
+  const { isFetching, data, isError } = useQuery<IUser, Error>({
     queryKey: [Key.Profile],
-    queryFn: fetchUserProfile,
-    enabled: true,
+    queryFn: mockStoreAuthState,
+    enabled: hasSession,
     staleTime: Infinity,
-    retry: false,
   });
 
-  const signin = useCallback(() => {
-    window.location.href = "/api/auth/login";
-  }, []);
+  function signIn(accessToken: string) {
+    localStorage.setItem(AUTH_STORAGE_KEY, accessToken);
+    setSignedIn(true);
+  }
 
-  const signout = useCallback(async () => {
-    try {
-      await fetch("/api/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      reactQueryClient.removeQueries({ queryKey: [Key.Profile] });
-      setSignedIn(false);
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-    }
-  }, []);
+  function signOut() {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    reactQueryClient.removeQueries({ queryKey: [Key.Profile] });
+    setSignedIn(false);
+  }
 
   useEffect(() => {
-    if (isSuccess) {
-      setSignedIn(true);
-      return;
-    }
     if (isError) {
-      alert("Sessão expirou ou inválida");
-      setSignedIn(false);
-      reactQueryClient.removeQueries({ queryKey: [Key.Profile] });
+      signOut();
     }
-  }, [isSuccess, isError]);
+  }, [isError]);
 
   return (
     <SessionContext.Provider
       value={{
-        signedIn: isSuccess && signedIn,
-        user: data ?? null,
-        signin,
-        signout,
+        isFetching,
+        applicationUser: data ?? null,
+        hasSession,
+        signIn,
+        signOut,
       }}
     >
       <LaunchScreen isLoading={isFetching} />
