@@ -1,14 +1,15 @@
-﻿using Project.Domain.Entities.User;
-using Project.Infra.Data;
+﻿using Project.Infra.Data;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 using ProblemDetails = Microsoft.AspNetCore.Mvc.ProblemDetails;
 using Project.Server.Identity;
 using Project.Server.Configuration;
+using Project.Domain.Entities;
 
 namespace Project.Server.DI;
 public static class ConfigureServices
@@ -19,7 +20,7 @@ public static class ConfigureServices
         {
             options.DefaultScheme = IdentityConstants.ApplicationScheme;
             options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-        }).AddIdentityCookies();
+        });
 
         services.AddAuthorizationBuilder();
 

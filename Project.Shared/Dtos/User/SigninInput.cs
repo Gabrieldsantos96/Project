@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
 namespace Project.Shared.Dtos.User;
-public sealed class UserAuthenticationInput
+public sealed class SigninInput
 {
     [Required(ErrorMessage = "Email é obrigatório")]
     [EmailAddress(ErrorMessage = "Email inválido")]

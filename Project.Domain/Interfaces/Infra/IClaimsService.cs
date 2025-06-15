@@ -1,5 +1,4 @@
 ﻿using Project.Domain.Entities;
-using Project.Domain.Entities.User;
 using System.Security.Claims;
 
 namespace Project.Domain.Interfaces.Infra;

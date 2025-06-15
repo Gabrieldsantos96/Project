@@ -1,13 +1,14 @@
-﻿using Project.Application.Features.User.Queries;
-using Project.Application.Graphql;
-using Project.Application.Graphql.Schema;
-using Project.Application.Services;
-using Project.Domain.Interfaces.Infra;
-using AppAny.HotChocolate.FluentValidation;
+﻿using AppAny.HotChocolate.FluentValidation;
 using HotChocolate.Execution.Configuration;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Project.Application.EntryPoints.User.Mutations;
+using Project.Application.Features.User.Queries;
+using Project.Application.Graphql;
+using Project.Application.Graphql.Schema;
+using Project.Application.Interceptors;
+using Project.Application.Services;
+using Project.Domain.Interfaces.Infra;
 
 namespace Project.Application.DI;
 public static class ConfigureServices
@@ -16,22 +17,26 @@ public static class ConfigureServices
     {
         services.AddScoped<HtmlRenderer>();
         services.AddScoped<RazorTemplateRenderer>();
+        services.AddScoped<ITokenHandler, TokenHandler>();
+        services.AddScoped<ITokenValidator, TokenValidator>();
         services.AddScoped<IGraphQL, Executor>();
         services.AddScoped<ICreateAccountResolver, CreateAccountResolver>();
-        services.AddScoped<IAuthenticateUserResolver, AuthenticateUserResolver>();
+        services.AddScoped<ISigninResolver, SigninResolver>();
+        services.AddScoped<ISignoutResolver, SignoutResolver>();
+        services.AddScoped<IRefreshTokenResolver, RefreshTokenResolver>();
         services.AddScoped<IUserChangePasswordResolver, UserChangePasswordResolver>();
         services.AddScoped<IResetPasswordResolver, ResetPasswordResolver>();
         services.AddScoped<IChangeJobRoleResolver, ChangeJobRoleResolver>();
         services.AddScoped<IResetPasswordRequestResolver, ResetPasswordRequestResolver>();
         services.AddScoped<IGetUserProfileResolver, GetUserProfileResolver>();
-        services.AddScoped<ILogoutResolver, LogoutResolver>();
-
+      
         services
             .AddGraphQLServer()
             .AddAuthorization()
             .AddFiltering()
             .AddSorting()
             .AddProjections()
+            .AddHttpRequestInterceptor<HttpRequestInterceptor>()
             .AddFluentValidation(s => s.UseDefaultErrorMapper())
             .ConfigBuilder();
 

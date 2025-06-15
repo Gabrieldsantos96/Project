@@ -1,6 +1,4 @@
-﻿
-namespace Project.Shared.Consts;
-
+﻿namespace Project.Shared.Consts;
 public static class RoleConsts
 {
     public const string Developer = "Developer";

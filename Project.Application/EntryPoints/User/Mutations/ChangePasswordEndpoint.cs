@@ -1,5 +1,4 @@
 ﻿using Project.Shared.Models;
-using Project.Domain.Entities.User;
 using Project.Domain.Extensions;
 using Project.Domain.Interfaces.Infra;
 using Project.Shared.Dtos.User;
@@ -8,6 +7,7 @@ using AppAny.HotChocolate.FluentValidation;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Project.Domain.Entities;
 
 namespace Project.Application.EntryPoints.User.Mutations;
 public sealed class ChangePasswordInputValidator : AbstractValidator<ChangePasswordInput>

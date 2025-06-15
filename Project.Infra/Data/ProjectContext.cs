@@ -1,5 +1,4 @@
 ﻿using Project.Domain.Entities;
-using Project.Domain.Entities.User;
 using Project.Domain.Interfaces.Infra;
 using Project.Shared.Consts;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
@@ -27,6 +26,7 @@ public sealed class ProjectContext(
     public DbSet<Department> Deparments { get; set; }
     public DbSet<Employee> Employees { get; set; }
     public DbSet<TenantBadge> TenantBadges { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     public void SetTenantId(int tenantId)
     {

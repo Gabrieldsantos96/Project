@@ -1,5 +1,4 @@
 ﻿using Project.Domain.Entities;
-using Project.Domain.Entities.User;
 using Project.Domain.Interfaces.Infra;
 using Project.Shared.Consts;
 using Project.Shared.Enums;

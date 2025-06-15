@@ -1,5 +1,4 @@
-﻿using Project.Domain.Entities.User;
-using Project.Shared.Enums;
+﻿using Project.Shared.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Project.Domain.Entities;

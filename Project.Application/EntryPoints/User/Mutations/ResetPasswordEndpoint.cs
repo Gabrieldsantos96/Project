@@ -1,5 +1,4 @@
-﻿using Project.Domain.Entities.User;
-using Project.Domain.Extensions;
+﻿using Project.Domain.Extensions;
 using Project.Domain.Interfaces.Infra;
 using Project.Shared.Dtos.User;
 using Project.Shared.Models;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using Project.Domain.Entities;
 
 namespace Project.Application.EntryPoints.User.Mutations;
 public sealed class ResetPasswordInputValidator : AbstractValidator<ResetPasswordInput>

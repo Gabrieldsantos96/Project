@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace Project.Domain.Entities.User;
+namespace Project.Domain.Entities;
 
 [Index(nameof(RefId))]
 [Index(nameof(Email))]

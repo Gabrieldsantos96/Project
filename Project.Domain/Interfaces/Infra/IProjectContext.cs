@@ -1,5 +1,4 @@
 ﻿using Project.Domain.Entities;
-using Project.Domain.Entities.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -8,6 +7,7 @@ namespace Project.Domain.Interfaces.Infra;
 public interface IProjectContext : IDisposable, IAsyncDisposable
 {
     public DbSet<ProjectUser> Users { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Company> Companies { get; set; }
     public DbSet<Department> Deparments { get; set; }
