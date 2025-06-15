@@ -25,31 +25,29 @@ public interface ICreateAccountResolver
 {
     Task<UserProfileDto> CreateAccountAsync(CreateAccountInput input, CancellationToken ct);
 }
-public sealed class CreateAccountResolver(IGraphQL _graphQL, UserManager<ProjectUser> _userManager) : ICreateAccountResolver
+public sealed class CreateAccountResolver(UserManager<ProjectUser> userManager) : ICreateAccountResolver
 {
     public async Task<UserProfileDto> CreateAccountAsync([UseFluentValidation, UseValidator<CreateAccountInputValidator>] CreateAccountInput input, CancellationToken ct)
     {
-        return await _graphQL.ExecuteMutationAsync(async context =>
+        var user = new ProjectUser
         {
-            var user = new ProjectUser
-            {
-                Name = input.Name,
-                Email = input.Email,
-                UserName = input.Email
-            };
+            Name = input.Name,
+            Email = input.Email,
+            UserName = input.Email
+        };
 
-            var result = await _userManager.CreateAsync(user, input.Password);
-            if (!result.Succeeded)
-            {
-                throw new ArgumentException(string.Join("; ", result.Errors.Select(e => e.Description)));
-            }
+        var result = await userManager.CreateAsync(user, input.Password);
 
-            return new UserProfileDto()
-            {
-                Id = user.RefId,
-                UserName = user.Name,
-                Email = user.Email
-            };
-        }, ct);
+        if (!result.Succeeded)
+        {
+            throw new ArgumentException(string.Join("; ", result.Errors.Select(e => e.Description)));
+        }
+
+        return new UserProfileDto()
+        {
+            Id = user.RefId,
+            UserName = user.Name,
+            Email = user.Email
+        };
     }
 }

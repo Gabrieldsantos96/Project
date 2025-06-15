@@ -1,5 +1,4 @@
-﻿using Project.Shared.Models;
-using Project.Application.Services;
+﻿using Project.Application.Services;
 using Project.Domain.Interfaces.Infra;
 using Project.Domain.Models;
 using Project.Templates;
@@ -20,20 +19,21 @@ public sealed class ResetPasswordRequestInputValidator : AbstractValidator<Reset
 }
 public interface IResetPasswordRequestResolver
 {
-    Task<MutationResult> ResetPasswordRequestAsync(ResetPasswordRequestInput input, CancellationToken ct);
+    Task<MutationResult<object>> ResetPasswordRequestAsync(ResetPasswordRequestInput input, CancellationToken ct);
 }
-public sealed class ResetPasswordRequestResolver(UserManager<ProjectUser> _userManager, IMailService _mailService, IGraphQL _graphQL, RazorTemplateRenderer _razorTemplateRenderer) : IResetPasswordRequestResolver
+public sealed class ResetPasswordRequestResolver(UserManager<ProjectUser> userManager, IProjectContextFactory projectContextFactory, IMailService mailService, RazorTemplateRenderer razorTemplateRenderer) : IResetPasswordRequestResolver
 {
-    public async Task<MutationResult> ResetPasswordRequestAsync([UseFluentValidation, UseValidator<ResetPasswordRequestInputValidator>] ResetPasswordRequestInput input, CancellationToken ct)
+    public async Task<MutationResult<object>> ResetPasswordRequestAsync([UseFluentValidation, UseValidator<ResetPasswordRequestInputValidator>] ResetPasswordRequestInput input, CancellationToken ct)
     {
-        var user = await _graphQL.ExecuteQueryAsync(
-        async context => await context.Users.AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email == input.Email), ct)
+        using var ctx = projectContextFactory.CreateDbContext();
+
+        var user = await ctx.Users.AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email == input.Email, ct)
         ?? throw new ArgumentException(ValidationMessages.DefaultAuthenticationError);
 
         await SendForgotPasswordEmailAsync(user, new ForgotPasswordModel(user.Name));
 
-        return MutationResult.Ok("Email de redefinição de senha enviado com sucesso. Verifique sua caixa de entrada ou spam.");
+        return MutationResult<object>.Ok("E-mail de redefinição de senha enviado com sucesso! Verifique sua caixa de entrada ou a pasta de spam.", new object());
 
     }
 
@@ -41,9 +41,9 @@ public sealed class ResetPasswordRequestResolver(UserManager<ProjectUser> _userM
     {
         model.Url += await GenerateResetPasswordToken(user);
 
-        var templateHtml = await _razorTemplateRenderer.RenderAsync<ForgotPasswordModelTemplate>(model);
+        var templateHtml = await razorTemplateRenderer.RenderAsync<ForgotPasswordModelTemplate>(model);
 
-        await _mailService.SendMailAsync(new MailRequest
+        await mailService.SendMailAsync(new MailRequest
         {
             Subject = "PROJECT - Redefinição de Senha",
             ContactName = user.Name,
@@ -54,7 +54,7 @@ public sealed class ResetPasswordRequestResolver(UserManager<ProjectUser> _userM
 
     private async Task<string> GenerateResetPasswordToken(ProjectUser user)
     {
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
 
         var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
         var encodedEmail = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(user.Email ?? ""));

@@ -8,21 +8,18 @@ public interface IGetUserProfileResolver
 {
     Task<UserProfileDto> GetUserProfileAsync(CancellationToken ct);
 }
-public sealed class GetUserProfileResolver(
-    IGraphQL _graphQL, IClaimsService _claimsService, IProjectContextFactory _projectContextFactory) : IGetUserProfileResolver
+public sealed class GetUserProfileResolver(IClaimsService claimsService, IProjectContextFactory projectContextFactory) : IGetUserProfileResolver
 {
     public async Task<UserProfileDto> GetUserProfileAsync(CancellationToken ct)
     {
-        await using var ctx = await _projectContextFactory.CreateDbContextAsync();
+        using var ctx = projectContextFactory.CreateDbContext();
 
-        var userId = _claimsService.GetUserId();
+        var userId = claimsService.GetUserId();
 
-        var user = await _graphQL.ExecuteQueryAsync(
-            ctx,
-            async context => await context.Users.AsNoTracking()
+        var user = await ctx.Users.AsNoTracking()
                 .IgnoreQueryFilters()
                 .Include(s => s.Employees).ThenInclude(s => s.Tenant)
-                .FirstOrDefaultAsync(u => u.Id == userId), ct)
+                .FirstOrDefaultAsync(u => u.Id == userId, ct)
             ?? throw new ArgumentException(ValidationMessages.DefaultAuthenticationError);
 
         var userDto = new UserProfileDto
@@ -39,7 +36,7 @@ public sealed class GetUserProfileResolver(
             })
         };
 
-        var selectedEmployeeRefId = _claimsService.GetEmployeeRefId();
+        var selectedEmployeeRefId = claimsService.GetEmployeeRefId();
 
         var employee = user.Employees.FirstOrDefault(s => s.RefId == selectedEmployeeRefId);
 

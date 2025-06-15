@@ -1,5 +1,4 @@
-﻿using Project.Shared.Models;
-using Project.Domain.Extensions;
+﻿using Project.Domain.Extensions;
 using Project.Domain.Interfaces.Infra;
 using Project.Shared.Dtos.User;
 using Project.Shared.Validations;
@@ -8,6 +7,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Project.Domain.Entities;
+using Project.Domain.Models;
 
 namespace Project.Application.EntryPoints.User.Mutations;
 public sealed class ChangePasswordInputValidator : AbstractValidator<ChangePasswordInput>
@@ -24,20 +24,21 @@ public sealed class ChangePasswordInputValidator : AbstractValidator<ChangePassw
 }
 public interface IUserChangePasswordResolver
 {
-    Task<MutationResult> ChangePasswordAsync(ChangePasswordInput input, CancellationToken ct);
+    Task<MutationResult<object>> ChangePasswordAsync(ChangePasswordInput input, CancellationToken ct);
 }
-public sealed class UserChangePasswordResolver(IClaimsService _claimsService,IGraphQL _graphQL, UserManager<ProjectUser> _userManager) : IUserChangePasswordResolver
+public sealed class UserChangePasswordResolver(IClaimsService claimsService,UserManager<ProjectUser> userManager, IProjectContextFactory projectContextFactory) : IUserChangePasswordResolver
 {
-    public async Task<MutationResult> ChangePasswordAsync([UseFluentValidation, UseValidator<ChangePasswordInputValidator>] ChangePasswordInput input, CancellationToken ct)
+    public async Task<MutationResult<object>> ChangePasswordAsync([UseFluentValidation, UseValidator<ChangePasswordInputValidator>] ChangePasswordInput input, CancellationToken ct)
     {
-        var userRefId = _claimsService.GetUserRefId();
-        
-        var user = await _graphQL.ExecuteQueryAsync(
-            async context => await context.Users.AsNoTracking()
-                .FirstOrDefaultAsync(u => u.RefId == userRefId), ct)
+        var userRefId = claimsService.GetUserRefId();
+
+        using var ctx = projectContextFactory.CreateDbContext();
+
+        var user = await ctx.Users.AsNoTracking()
+                .FirstOrDefaultAsync(u => u.RefId == userRefId,ct)
             ?? throw new ArgumentException(ValidationMessages.DefaultAuthenticationError);
 
-        var result = await _userManager.ChangePasswordAsync(user, input.CurrentPassword, input.NewPassword);
+        var result = await userManager.ChangePasswordAsync(user, input.CurrentPassword, input.NewPassword);
 
         if (!result.Succeeded)
         {
@@ -45,6 +46,6 @@ public sealed class UserChangePasswordResolver(IClaimsService _claimsService,IGr
             throw new DomainException(error ?? "Ocorreu um erro ao redefinir a sua senha");
         }
 
-        return MutationResult.Ok("Senha alterada com sucesso");
+        return MutationResult<object>.Ok("Senha alterada com sucesso", new object());
     }
 }

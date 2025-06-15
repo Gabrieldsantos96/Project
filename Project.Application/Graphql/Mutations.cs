@@ -1,14 +1,15 @@
 ﻿using HotChocolate.Authorization;
 using Project.Application.EntryPoints.User.Mutations;
+using Project.Application.EntryPoints.Workflow.Mutations;
+using Project.Domain.Entities;
 using Project.Domain.Models;
 using Project.Shared.Dtos.User;
-using Project.Shared.Models;
+using Project.Shared.Dtos.Workflow;
 
 namespace Project.Application.Graphql;
 public class Mutations
 {
     #region User entrypoints
-
     public async Task<MutationResult<AuthenticationDto>> SigninAsync(
         [Service] ISigninResolver signinResolver,
         SigninInput input,
@@ -44,7 +45,7 @@ public class Mutations
     }
 
     [Authorize]
-    public async Task<MutationResult> ChangeJobRoleAsync(
+    public async Task<MutationResult<object>> ChangeJobRoleAsync(
         [Service] IChangeJobRoleResolver changeJobRoleResolver,
         ChangeJobRoleInput input,
         CancellationToken ct)
@@ -53,7 +54,7 @@ public class Mutations
     }
 
     [Authorize]
-    public async Task<MutationResult> ChangePasswordAsync(
+    public async Task<MutationResult<object>> ChangePasswordAsync(
         [Service] IUserChangePasswordResolver userChangePasswordResolver,
         ChangePasswordInput input,
         CancellationToken ct)
@@ -61,7 +62,7 @@ public class Mutations
         return await userChangePasswordResolver.ChangePasswordAsync(input, ct);
     }
 
-    public async Task<MutationResult> ResetPasswordRequestAsync(
+    public async Task<MutationResult<object>> ResetPasswordRequestAsync(
         [Service] IResetPasswordRequestResolver resetPasswordRequestResolver,
         ResetPasswordRequestInput input,
         CancellationToken ct)
@@ -69,12 +70,31 @@ public class Mutations
         return await resetPasswordRequestResolver.ResetPasswordRequestAsync(input, ct);
     }
 
-    public async Task<MutationResult> ResetPasswordAsync(
+    [Authorize]
+    public async Task<MutationResult<object>> ResetPasswordAsync(
         [Service] IResetPasswordResolver resetPasswordResolver,
         ResetPasswordInput input,
         CancellationToken ct)
     {
         return await resetPasswordResolver.ResetPasswordAsync(input, ct);
+    }
+
+    #endregion
+
+    #region Workflow
+    public async Task<MutationResult<WorkflowMatching>> CreateWorkflowMatchingAsync(
+        [Service] IMatchingResolver matchingResolver,
+        CreateWorkflowMatchingInput input,
+        CancellationToken ct)
+    {
+        return await matchingResolver.CreateMatchingAsync(input, ct);
+    }
+    public async Task<MutationResult<WorkflowPurchaseOrder>> CreateWorkflowPurchaseOrderAsync(
+        [Service] IPurchaseOrderResolver purchaseOrderResolver,
+        CreateWorkflowPurchaseOrderInput input,
+        CancellationToken ct)
+    {
+        return await purchaseOrderResolver.CreatePurchaseOrderAsync(input, ct);
     }
 
     #endregion

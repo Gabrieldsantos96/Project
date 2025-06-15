@@ -10,26 +10,20 @@ public interface ISignoutResolver
 {
     Task<MutationResult<object>> SignOutAsync(RefreshTokenInput input, CancellationToken ct);
 }
-public sealed class SignoutResolver(IHttpContextAccessor httpContextAccessor, IProjectContextFactory projectContextFactory, IClaimsService claimsService, IGraphQL graphQL) : ISignoutResolver
+public sealed class SignoutResolver(IProjectContextFactory projectContextFactory, IClaimsService claimsService) : ISignoutResolver
 {
     public async Task<MutationResult<object>> SignOutAsync(RefreshTokenInput input, CancellationToken ct)
     {
-        if (httpContextAccessor.HttpContext != null)
-        {
-            await using var ctx = await projectContextFactory.CreateDbContextAsync();
+        await using var ctx = await projectContextFactory.CreateDbContextAsync();
 
-            var refreshToken = await graphQL.ExecuteQueryAsync(
-            ctx,
-            async context => await context.RefreshTokens
-           .FirstOrDefaultAsync(u => u.TokenHash == input.RefreshToken && u.UserRefId == claimsService.GetUserRefId()), ct) ?? throw new NotFoundException();
+        var refreshToken = await ctx.RefreshTokens
+       .FirstOrDefaultAsync(u => u.TokenHash == input.RefreshToken && u.UserRefId == claimsService.GetUserRefId(), ct) ?? throw new NotFoundException();
 
-            ctx.RefreshTokens.Remove(refreshToken);
+        ctx.RefreshTokens.Remove(refreshToken);
 
-            await ctx.SaveChangesAsync(ct);
+        await ctx.SaveChangesAsync(ct);
 
-            return MutationResult<object>.Ok("", new object());
-        }
+        return MutationResult<object>.Ok("Ok", new object());
 
-        return default!;
     }
 }

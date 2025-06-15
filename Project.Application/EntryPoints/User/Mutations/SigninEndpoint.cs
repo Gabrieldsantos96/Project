@@ -25,28 +25,26 @@ public interface ISigninResolver
 {
     Task<MutationResult<AuthenticationDto>> SigninAsync(SigninInput input, CancellationToken ct);
 }
-public sealed class SigninResolver(SignInManager<ProjectUser> _signInManager, IGraphQL _graphQL,IClaimsService _claimsService, IProjectContextFactory _projectContextFactory, ITokenHandler _tokenHandler) : ISigninResolver
+public sealed class SigninResolver(SignInManager<ProjectUser> signInManager, IClaimsService claimsService, IProjectContextFactory projectContextFactory, ITokenHandler _tokenHandler) : ISigninResolver
 {
     public async Task<MutationResult<AuthenticationDto>> SigninAsync(
         [UseFluentValidation, UseValidator<SigninInputValidator>] SigninInput input,
         CancellationToken ct)
     {
 
-        await using var ctx = await _projectContextFactory.CreateDbContextAsync();
+        using var ctx = projectContextFactory.CreateDbContext();
 
-        var user = await _graphQL.ExecuteQueryAsync(
-           ctx,
-           async context => await context.Users.AsNoTracking()
-               .FirstOrDefaultAsync(u => u.Email == input.Email), ct)
+        var user = await ctx.Users.AsNoTracking()
+               .FirstOrDefaultAsync(u => u.Email == input.Email, ct)
            ?? throw new ArgumentException(ValidationMessages.DefaultAuthenticationError);
 
-        var result = await _signInManager.CheckPasswordSignInAsync(user, input.Password, false);
+        var result = await signInManager.CheckPasswordSignInAsync(user, input.Password, false);
 
         if (result.Succeeded)
         {
             var current = user.Employees.FirstOrDefault(s => s.Id == user.EmployeeSelectedId);
 
-            var claims = _claimsService.GenerateClaims(user, current);
+            var claims = claimsService.GenerateClaims(user, current);
 
             var (accessToken, refreshTokenHash) = _tokenHandler.CreateJwt(claims);
 

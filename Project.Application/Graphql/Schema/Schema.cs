@@ -1,10 +1,10 @@
 ﻿using Project.Domain.Entities;
 using Project.Shared.Consts;
 using Project.Shared.Dtos.User;
+using Project.Shared.Dtos.Workflow;
 using Project.Shared.Enums;
 
 namespace Project.Application.Graphql.Schema;
-
 public class EntitySchema : ObjectType<Entity>
 {
     protected override void Configure(IObjectTypeDescriptor<Entity> descriptor)
@@ -16,7 +16,6 @@ public class EntitySchema : ObjectType<Entity>
         descriptor.Field(f => f.UpdatedBy).Type<StringType>();
     }
 }
-
 public class TenantSchema : ObjectType<Tenant>
 {
     protected override void Configure(IObjectTypeDescriptor<Tenant> descriptor)
@@ -29,7 +28,6 @@ public class TenantSchema : ObjectType<Tenant>
                   .Type<NonNullType<ListType<NonNullType<TenantBadgeSchema>>>>();
     }
 }
-
 public class TenantBadgeSchema : ObjectType<TenantBadge>
 {
     protected override void Configure(IObjectTypeDescriptor<TenantBadge> descriptor)
@@ -43,7 +41,6 @@ public class TenantBadgeSchema : ObjectType<TenantBadge>
                   .Type<NonNullType<ListType<NonNullType<EmployeeSchema>>>>();
     }
 }
-
 public class CompanySchema : ObjectType<Company>
 {
     protected override void Configure(IObjectTypeDescriptor<Company> descriptor)
@@ -56,7 +53,6 @@ public class CompanySchema : ObjectType<Company>
         descriptor.Field(f => f.Departments).Type<NonNullType<ListType<NonNullType<DepartmentSchema>>>>();
     }
 }
-
 public class DepartmentSchema : ObjectType<Department>
 {
     protected override void Configure(IObjectTypeDescriptor<Department> descriptor)
@@ -70,7 +66,6 @@ public class DepartmentSchema : ObjectType<Department>
         descriptor.Field(f => f.Name).Type<NonNullType<StringType>>();
     }
 }
-
 public class ProjectUserSchema : ObjectType<ProjectUser>
 {
     protected override void Configure(IObjectTypeDescriptor<ProjectUser> descriptor)
@@ -86,7 +81,6 @@ public class ProjectUserSchema : ObjectType<ProjectUser>
         descriptor.Field(f => f.EmployeeSelectedId).Type<IntType>();
     }
 }
-
 public class EmployeeSchema : ObjectType<Employee>
 {
     protected override void Configure(IObjectTypeDescriptor<Employee> descriptor)
@@ -102,8 +96,6 @@ public class EmployeeSchema : ObjectType<Employee>
                   .Type<NonNullType<ListType<NonNullType<TenantBadgeSchema>>>>();
     }
 }
-
-
 public class BadgeTypeSchema : EnumType<BadgeType>
 {
     protected override void Configure(IEnumTypeDescriptor<BadgeType> descriptor)
@@ -114,7 +106,6 @@ public class BadgeTypeSchema : EnumType<BadgeType>
         descriptor.Value(BadgeType.Manager).Name(BadgeConsts.Manager);
     }
 }
-
 public class UserProfileDtoSchema : ObjectType<UserProfileDto>
 {
     protected override void Configure(IObjectTypeDescriptor<UserProfileDto> descriptor)
@@ -126,7 +117,6 @@ public class UserProfileDtoSchema : ObjectType<UserProfileDto>
         descriptor.Field(f => f.EmployeeDtos).Type<NonNullType<ListType<NonNullType<EmployeeDtoSchema>>>>();
     }
 }
-
 public class EmployeeDtoSchema : ObjectType<EmployeeDto>
 {
     protected override void Configure(IObjectTypeDescriptor<EmployeeDto> descriptor)
@@ -137,4 +127,64 @@ public class EmployeeDtoSchema : ObjectType<EmployeeDto>
         descriptor.Field(f => f.BadgeDtos).Type<NonNullType<ListType<NonNullType<BadgeTypeSchema>>>>();
     }
 }
+public interface IWorkflow : ITenant
+{
+    int Id { get; }
+    Guid RefId { get; }
+}
+public class WorkflowInterfaceTypeSchema : InterfaceType<IWorkflow>
+{
+    protected override void Configure(IInterfaceTypeDescriptor<IWorkflow> descriptor)
+    {
+        descriptor.Field(f => f.Id).Type<NonNullType<IntType>>();
+        descriptor.Field(f => f.RefId).Type<NonNullType<UuidType>>();
+        descriptor.Field(f => f.TenantId).Type<NonNullType<IntType>>();
+        descriptor.Field(f => f.Tenant).Type<TenantSchema>();
+    }
+}
+public class WorkflowPurchaseOrderTypeSchema : ObjectType<WorkflowPurchaseOrder>
+{
+    protected override void Configure(IObjectTypeDescriptor<WorkflowPurchaseOrder> descriptor)
+    {
+        descriptor.Implements<WorkflowInterfaceTypeSchema>();
+        descriptor.Name(nameof(WorkflowPurchaseOrder));
+        descriptor.Field(t => t.Amount).Type<DecimalType>();
+    }
+}
+public class WorkflowMatchingTypeSchema : ObjectType<WorkflowMatching>
+{
+    protected override void Configure(IObjectTypeDescriptor<WorkflowMatching> descriptor)
+    {
+        descriptor.Implements<WorkflowInterfaceTypeSchema>();
+        descriptor.Name(nameof(WorkflowMatching));
+        descriptor.Field(t => t.MatchCriteria).Type<StringType>();
+    }
+}
+public class WorkflowBaseInputTypeSchema : InputObjectType<CreateWorkflowBaseInput>
+{
+    protected override void Configure(IInputObjectTypeDescriptor<CreateWorkflowBaseInput> descriptor)
+    {
+        descriptor.Name(nameof(CreateWorkflowBaseInput));
+        descriptor.Field(f => f.Type).Type<NonNullType<StringType>>();
+    }
+}
 
+public class WorkflowPurchaseInputOrderTypeSchema : InputObjectType<CreateWorkflowPurchaseOrderInput>
+{
+    protected override void Configure(IInputObjectTypeDescriptor<CreateWorkflowPurchaseOrderInput> descriptor)
+    {
+        descriptor.Name(nameof(CreateWorkflowPurchaseOrderInput));
+        descriptor.Field(t => t.Type).Type<NonNullType<StringType>>();
+        descriptor.Field(t => t.Amount).Type<NonNullType<DecimalType>>();
+    }
+}
+
+public class WorkflowMatchingInputTypeSchema : InputObjectType<CreateWorkflowMatchingInput>
+{
+    protected override void Configure(IInputObjectTypeDescriptor<CreateWorkflowMatchingInput> descriptor)
+    {
+        descriptor.Name(nameof(CreateWorkflowMatchingInput));
+        descriptor.Field(t => t.Type).Type<NonNullType<StringType>>();
+        descriptor.Field(t => t.MatchCriteria).Type<NonNullType<StringType>>();
+    }
+}

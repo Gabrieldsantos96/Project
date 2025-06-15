@@ -16,4 +16,5 @@ public static class ValidationMessages
     public const string DefaultAuthenticationError = "Usuário ou senha inválida";
     public const string UserLockedOut = "Usuário bloqueado. Tente novamente dentro de alguns minutos";
     public const string IsNotAllowed = "Usuário não confirmou a conta.";
+    public const string NotFound = "Entidade não encontrada.";
 }

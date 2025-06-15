@@ -27,7 +27,7 @@ public sealed class ProjectContext(
     public DbSet<Employee> Employees { get; set; }
     public DbSet<TenantBadge> TenantBadges { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
-
+    public DbSet<WorkflowBase> Workflows { get; set; }
     public void SetTenantId(int tenantId)
     {
         _tenantId = tenantId;

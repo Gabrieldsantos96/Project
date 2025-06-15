@@ -3,6 +3,8 @@ using HotChocolate.Execution.Configuration;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.Extensions.DependencyInjection;
 using Project.Application.EntryPoints.User.Mutations;
+using Project.Application.EntryPoints.Workflow.Mutations;
+using Project.Application.EntryPoints.Workflow.Queries;
 using Project.Application.Features.User.Queries;
 using Project.Application.Graphql;
 using Project.Application.Graphql.Schema;
@@ -19,7 +21,6 @@ public static class ConfigureServices
         services.AddScoped<RazorTemplateRenderer>();
         services.AddScoped<ITokenHandler, TokenHandler>();
         services.AddScoped<ITokenValidator, TokenValidator>();
-        services.AddScoped<IGraphQL, Executor>();
         services.AddScoped<ICreateAccountResolver, CreateAccountResolver>();
         services.AddScoped<ISigninResolver, SigninResolver>();
         services.AddScoped<ISignoutResolver, SignoutResolver>();
@@ -29,7 +30,12 @@ public static class ConfigureServices
         services.AddScoped<IChangeJobRoleResolver, ChangeJobRoleResolver>();
         services.AddScoped<IResetPasswordRequestResolver, ResetPasswordRequestResolver>();
         services.AddScoped<IGetUserProfileResolver, GetUserProfileResolver>();
-      
+
+        services.AddScoped<IPurchaseOrderResolver, CreatePurchaseOrderResolver>();
+        services.AddScoped<IMatchingResolver, CreateMatchingResolver>();
+        services.AddScoped<IFindWorkflowByRefResolver, FindWorkflowByRefResolver>();
+        services.AddScoped<IListWorkflowsResolver, ListWorkflowsResolver>();
+
         services
             .AddGraphQLServer()
             .AddAuthorization()
@@ -42,13 +48,12 @@ public static class ConfigureServices
 
         return services;
     }
-
     public static void ConfigBuilder(this IRequestExecutorBuilder builder)
     {
         AddSchemas(builder);
+        AddInputs(builder);
         AddResolvers(builder);
     }
-
     public static void AddSchemas(IRequestExecutorBuilder builder)
     {
         builder
@@ -60,10 +65,20 @@ public static class ConfigureServices
             .AddType<ProjectUserSchema>()
             .AddType<UserProfileDtoSchema>()
             .AddType<EmployeeDtoSchema>()
-            .AddType<BadgeTypeSchema>();
+            .AddType<BadgeTypeSchema>()
+            .AddType<WorkflowInterfaceTypeSchema>()
+            .AddType<WorkflowMatchingTypeSchema>()
+            .AddType<WorkflowPurchaseOrderTypeSchema>();
     }
+    public static void AddInputs(IRequestExecutorBuilder builder)
+    {
+        builder
+           .AddType<WorkflowBaseInputTypeSchema>()
+           .AddType<WorkflowMatchingInputTypeSchema>()
+           .AddType<WorkflowPurchaseInputOrderTypeSchema>();
 
-    public static void AddResolvers(this IRequestExecutorBuilder builder)
+    }
+    public static void AddResolvers(IRequestExecutorBuilder builder)
     {
         builder
             .AddQueryType<Queries>()
