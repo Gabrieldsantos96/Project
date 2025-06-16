@@ -46,6 +46,8 @@ public static class ConfigureServices
 
         services.AddScoped<IClaimsService, ClaimsService>();
 
+        services.AddScoped<IRavenSessionFactory, RavenSessionFactory>();
+
         services.AddScoped<IProjectContextFactory, ProjectContextFactory>();
 
 
