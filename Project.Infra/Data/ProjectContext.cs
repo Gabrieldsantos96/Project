@@ -46,16 +46,20 @@ public sealed class ProjectContext(
             relationship.DeleteBehavior = DeleteBehavior.Restrict;
         }
 
-        var entityTypes = modelBuilder.Model.GetEntityTypes()
-            .Where(t => typeof(ITenant).IsAssignableFrom(t.ClrType) && t.BaseType == null);
+        modelBuilder.Entity<WorkflowBase>().HasDiscriminator<string>("WorkflowType")
+        .HasValue<WorkflowPurchaseOrder>(nameof(WorkflowPurchaseOrder))
+        .HasValue<WorkflowMatching>(nameof(WorkflowMatching));
 
-        foreach (var entityType in entityTypes)
-        {
-            var method = typeof(ProjectContext).GetMethod(nameof(SetGlobalQueryFilter), BindingFlags.NonPublic | BindingFlags.Instance)
-                ?.MakeGenericMethod(entityType.ClrType);
+        //var entityTypes = modelBuilder.Model.GetEntityTypes()
+        //    .Where(t => typeof(ITenant).IsAssignableFrom(t.ClrType) && t.BaseType == null);
 
-            method?.Invoke(this, [modelBuilder]);
-        }
+        //foreach (var entityType in entityTypes)
+        //{
+        //    var method = typeof(ProjectContext).GetMethod(nameof(SetGlobalQueryFilter), BindingFlags.NonPublic | BindingFlags.Instance)
+        //        ?.MakeGenericMethod(entityType.ClrType);
+
+        //    method?.Invoke(this, [modelBuilder]);
+        //}
         #endregion
 
         #region Relations

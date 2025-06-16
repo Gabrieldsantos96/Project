@@ -1,18 +1,18 @@
-﻿using Project.Domain.Entities;
+﻿using Project.Application.Graphql.Schema;
 using Project.Domain.Interfaces.Infra;
+using Raven.Client.Documents.Linq;
 
 namespace Project.Application.EntryPoints.Workflow.Queries;
 public interface IListWorkflowsResolver
 {
-    IQueryable<WorkflowBase> ListWorkflows(CancellationToken ct);
+    IRavenQueryable<IWorkflow> ListWorkflows(CancellationToken ct);
 }
-public sealed class ListWorkflowsResolver(IProjectContextFactory projectContextFactory) : IListWorkflowsResolver
+public sealed class ListWorkflowsResolver(IRavenSessionFactory sessionFactory) : IListWorkflowsResolver
 {
-    public IQueryable<WorkflowBase> ListWorkflows(CancellationToken ct)
+    public IRavenQueryable<IWorkflow> ListWorkflows(CancellationToken ct)
     {
-        using var ctx = projectContextFactory.CreateDbContext();
+        using var session = sessionFactory.OpenSession();
 
-        return ctx.Workflows.AsQueryable();
-
+        return session.Query<IWorkflow>();
     }
 }

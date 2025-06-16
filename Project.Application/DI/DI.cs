@@ -10,7 +10,6 @@ using Project.Application.Graphql;
 using Project.Application.Graphql.Schema;
 using Project.Application.Interceptors;
 using Project.Application.Services;
-using Project.Domain.Interfaces.Infra;
 
 namespace Project.Application.DI;
 public static class ConfigureServices
@@ -42,6 +41,10 @@ public static class ConfigureServices
             .AddFiltering()
             .AddSorting()
             .AddProjections()
+            .AddRavenFiltering()
+  	        .AddRavenProjections()
+  	        .AddRavenSorting()
+  	        .AddRavenPagingProviders()
             .AddHttpRequestInterceptor<HttpRequestInterceptor>()
             .AddFluentValidation(s => s.UseDefaultErrorMapper())
             .ConfigBuilder();

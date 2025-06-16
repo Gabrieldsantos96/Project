@@ -13,6 +13,7 @@
 		<PackageReference Include="HotChocolate.AspNetCore" Version="15.1.5" />
 		<PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="15.1.5" />
 		<PackageReference Include="HotChocolate.Data.EntityFramework" Version="15.1.5" />
+		<PackageReference Include="HotChocolate.Data.Raven" Version="15.1.5" />
 	</ItemGroup>
 
 	<ItemGroup>
