@@ -1,9 +1,6 @@
 ﻿using System.Security.Cryptography.X509Certificates;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
-using Raven.Client.ServerWide;
-using Raven.Client.ServerWide.Operations;
-
 namespace Project.Infra.Data;
 public static class RavenDbContext
 {
@@ -26,8 +23,7 @@ public static class RavenDbContext
 
         try
         {
-            var createDbOp = new CreateDatabaseOperation(new DatabaseRecord(databaseName));
-            store.Maintenance.Server.Send(createDbOp);
+            store.Initialize();
         }
         catch (Exception ex)
         {
@@ -36,7 +32,7 @@ public static class RavenDbContext
 
         Console.WriteLine($"Conectado ao database:'{databaseName}");
 
-        store.Initialize();
+        
 
         return store;
     }

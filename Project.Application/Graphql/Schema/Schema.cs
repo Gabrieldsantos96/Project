@@ -127,11 +127,6 @@ public class EmployeeDtoSchema : ObjectType<EmployeeDto>
         descriptor.Field(f => f.BadgeDtos).Type<NonNullType<ListType<NonNullType<BadgeTypeSchema>>>>();
     }
 }
-public interface IWorkflow : ITenant
-{
-    int Id { get; }
-    Guid RefId { get; }
-}
 public class WorkflowInterfaceTypeSchema : InterfaceType<IWorkflow>
 {
     protected override void Configure(IInterfaceTypeDescriptor<IWorkflow> descriptor)

@@ -3,10 +3,16 @@ using System.Text.Json.Serialization;
 
 namespace Project.Domain.Entities;
 
+public interface IWorkflow : ITenant
+{
+    int Id { get; }
+    Guid RefId { get; }
+}
+
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
 [JsonDerivedType(typeof(WorkflowPurchaseOrder), typeDiscriminator: nameof(WorkflowPurchaseOrder))]
 [JsonDerivedType(typeof(WorkflowMatching), typeDiscriminator: nameof(WorkflowMatching))]
-public class WorkflowBase : Entity, ITenant
+public class WorkflowBase : Entity, ITenant, IWorkflow
 {
     public Guid RefId { get; set; } = Guid.NewGuid();
 

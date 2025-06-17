@@ -1,18 +1,31 @@
-﻿using Project.Application.Graphql.Schema;
+﻿using Project.Domain.Entities;
 using Project.Domain.Interfaces.Infra;
 using Raven.Client.Documents.Linq;
 
 namespace Project.Application.EntryPoints.Workflow.Queries;
-public interface IListWorkflowsResolver
+public interface IListWorkflowResolvers
 {
-    IRavenQueryable<IWorkflow> ListWorkflows(CancellationToken ct);
-}
-public sealed class ListWorkflowsResolver(IRavenSessionFactory sessionFactory) : IListWorkflowsResolver
-{
-    public IRavenQueryable<IWorkflow> ListWorkflows(CancellationToken ct)
-    {
-        using var session = sessionFactory.OpenSession();
+    IRavenQueryable<WorkflowMatching> ListMatchings(CancellationToken ct);
 
-        return session.Query<IWorkflow>();
+    IRavenQueryable<WorkflowPurchaseOrder> ListPurchaseOrders(CancellationToken ct);
+
+    IRavenQueryable<WorkflowBase> ListBases(CancellationToken ct);
+}
+public sealed class ListWorkflowsResolvers(IRavenSessionFactory sessionFactory) : IListWorkflowResolvers
+{
+    public IRavenQueryable<WorkflowMatching> ListMatchings(CancellationToken ct)
+    {
+        var session = sessionFactory.OpenSessionAsync();
+        return session.Query<WorkflowMatching>();
+    }
+    public IRavenQueryable<WorkflowPurchaseOrder> ListPurchaseOrders(CancellationToken ct)
+    {
+        var session = sessionFactory.OpenSessionAsync();
+        return session.Query<WorkflowPurchaseOrder>();
+    }
+    public IRavenQueryable<WorkflowBase> ListBases(CancellationToken ct)
+    {
+        var session = sessionFactory.OpenSessionAsync();
+        return session.Query<WorkflowBase>();
     }
 }

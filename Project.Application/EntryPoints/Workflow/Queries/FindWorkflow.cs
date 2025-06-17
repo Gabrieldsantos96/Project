@@ -5,13 +5,13 @@ using Project.Domain.Models;
 using Project.Shared.Validations;
 
 namespace Project.Application.EntryPoints.Workflow.Queries;
-public interface IFindWorkflowByRefResolver
+public interface IFindWorkflowResolver
 {
-    Task<MutationResult<WorkflowBase>> FindWorkflowByRef(Guid refId, CancellationToken ct);
+    Task<MutationResult<WorkflowBase>> FindWorkflow(Guid refId, CancellationToken ct);
 }
-public sealed class FindWorkflowByRefResolver(IProjectContextFactory _projectContextFactory) : IFindWorkflowByRefResolver
+public sealed class FindWorkflowByRefResolver(IProjectContextFactory _projectContextFactory) : IFindWorkflowResolver
 {
-    public async Task<MutationResult<WorkflowBase>> FindWorkflowByRef(
+    public async Task<MutationResult<WorkflowBase>> FindWorkflow(
         Guid refId, CancellationToken ct)
     {
         using var ctx = _projectContextFactory.CreateDbContext();

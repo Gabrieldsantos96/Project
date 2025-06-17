@@ -16,4 +16,9 @@ public class RavenSessionFactory : IRavenSessionFactory
     {
         return _documentStore.OpenSession();
     }
+
+    public IAsyncDocumentSession OpenSessionAsync()
+    {
+        return _documentStore.OpenAsyncSession();
+    }
 }

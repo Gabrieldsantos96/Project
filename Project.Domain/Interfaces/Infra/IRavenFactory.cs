@@ -4,4 +4,5 @@ namespace Project.Domain.Interfaces.Infra;
 public interface IRavenSessionFactory
 {
     IDocumentSession OpenSession();
+    IAsyncDocumentSession OpenSessionAsync();
 }

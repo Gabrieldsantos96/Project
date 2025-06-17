@@ -21,10 +21,9 @@ public static class ConfigureServices
 
             var store = RavenDbContext.CreateDocumentStore(
                 databaseName: "project",
-                urls: ["127.0.0.1"],
+                urls: ["https://a.gsantos.development.run"],
                 certificate: GetCertificate());
 
-            store.Initialize();
             return store;
         });
 
@@ -66,7 +65,7 @@ public static class ConfigureServices
     {
         var certificatePath = @"C:\Users\gahds\source\repos\Project\Project.Infra\admin.client.certificate.gsantos.pfx";
 
-        var pfxBytes = Convert.FromBase64String(certificatePath);
+        var pfxBytes = File.ReadAllBytes(certificatePath);
 
         return X509CertificateLoader.LoadPkcs12(pfxBytes, null);
     }

@@ -32,8 +32,8 @@ public static class ConfigureServices
 
         services.AddScoped<IPurchaseOrderResolver, CreatePurchaseOrderResolver>();
         services.AddScoped<IMatchingResolver, CreateMatchingResolver>();
-        services.AddScoped<IFindWorkflowByRefResolver, FindWorkflowByRefResolver>();
-        services.AddScoped<IListWorkflowsResolver, ListWorkflowsResolver>();
+        services.AddScoped<IFindWorkflowResolver, FindWorkflowByRefResolver>();
+        services.AddScoped<IListWorkflowResolvers, ListWorkflowsResolvers>();
 
         services
             .AddGraphQLServer()
